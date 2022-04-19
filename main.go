@@ -37,11 +37,11 @@ func printWhois(host string) {
 func printSANs(host string) {
 	tlsVersion, response, err := SANs(host)
 	if err != nil {
-		printHeader(fmt.Sprintf("SANs %s", host))
+		printHeader("SANs")
 		fmt.Println(err.Error())
 		return
 	}
-	printHeader(fmt.Sprintf("SANs %s %s", tlsVersion, host))
+	printHeader(fmt.Sprintf("SANs %s", tlsVersion))
 	fmt.Println(strings.Join(response, ", "))
 	fmt.Println()
 }
@@ -53,7 +53,7 @@ func printLookup(host string) {
 		fmt.Println(err.Error())
 		return
 	}
-	fmt.Println(response.PrettyString())
+	response.PrettyPrint()
 	fmt.Println()
 }
 

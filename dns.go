@@ -7,28 +7,47 @@ import (
 )
 
 type Host struct {
-	Host           string
-	Address        []string
-	MX             []string
-	CNAME          string
-	NS             []string
-	TXT            []string
-	NamesByAddress map[string][]string
+	Host    string
+	Address []Address
+	CNAME   string
+	NS      []string
+	MX      []string
+	TXT     []string
 }
 
-func (h Host) PrettyString() string {
-	lines := []string{
-		fmt.Sprintf("%s has address %v", h.Host, strings.Join(h.Address, ", ")),
-		fmt.Sprintf("  mail is handled by %s", strings.Join(h.MX, ", ")),
-		fmt.Sprintf("  CNAME %s", h.CNAME),
-		fmt.Sprintf("  DNS NS records %s", strings.Join(h.NS, ", ")),
-		fmt.Sprintf("  TXT NS records %s", strings.Join(h.TXT, ", ")),
+type Address struct {
+	Address string
+	Names   []string
+}
+
+func (a Address) String() string {
+	if len(a.Names) == 0 {
+		return a.Address
 	}
-	for _, a := range h.Address {
-		names := h.NamesByAddress[a]
-		lines = append(lines, fmt.Sprintf("%s domain name pointer %s", a, strings.Join(names, ", ")))
+	return fmt.Sprintf("%s domain name pointer %s", a.Address, strings.Join(a.Names, ", "))
+}
+
+func (h Host) PrettyPrint() {
+	fmt.Printf("%s has address\n", h.Host)
+	for _, address := range h.Address {
+		fmt.Printf("  %s\n", address)
 	}
-	return strings.Join(lines, "\n")
+	fmt.Printf("CNAME %s\n", h.CNAME)
+
+	fmt.Println("NS records")
+	for _, record := range h.NS {
+		fmt.Printf("  %s\n", record)
+	}
+
+	fmt.Println("MX records")
+	for _, record := range h.MX {
+		fmt.Printf("  %s\n", record)
+	}
+
+	fmt.Println("TXT records")
+	for _, record := range h.TXT {
+		fmt.Printf("  %s\n", record)
+	}
 }
 
 func LookupHost(host string) (Host, error) {
@@ -38,27 +57,26 @@ func LookupHost(host string) (Host, error) {
 	}
 
 	return Host{
-		Host:           host,
-		MX:             lookupMX(host),
-		CNAME:          lookupCNAME(host),
-		NS:             lookupNS(host),
-		TXT:            lookupTXT(host),
-		Address:        address,
-		NamesByAddress: lookupAddr(address),
+		Host:    host,
+		MX:      lookupMX(host),
+		CNAME:   lookupCNAME(host),
+		NS:      lookupNS(host),
+		TXT:     lookupTXT(host),
+		Address: lookupAddr(address),
 	}, nil
 }
 
-func lookupAddr(address []string) map[string][]string {
-	namesByAddress := make(map[string][]string)
+func lookupAddr(address []string) []Address {
+	var addresses []Address
 	for _, a := range address {
 		names, err := net.LookupAddr(a)
 		if err != nil {
-			namesByAddress[a] = []string{err.Error()}
+			addresses = append(addresses, Address{Address: a})
 			continue
 		}
-		namesByAddress[a] = names
+		addresses = append(addresses, Address{Address: a, Names: names})
 	}
-	return namesByAddress
+	return addresses
 }
 
 func lookupMX(host string) []string {
