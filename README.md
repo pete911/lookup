@@ -39,3 +39,8 @@ TXT records
   google-site-verification=rivq8jKu6AADGtbbEzJhmOpcqq08B7QxIzXxYV8DtyU
   v=spf1 include:_spf.google.com include:mailgun.org a:rsweb1-36.investorflow.com include:_spf.createsend.com include:servers.mcsv.net -all
 ```
+
+## release
+
+Releases are published when the new tag is created e.g.
+`git tag -m "add super cool feature" v1.0.0 && git push --follow-tags`
