@@ -11,6 +11,8 @@ const (
 	defaultWhoisPort    = "43"
 )
 
+var Version = "dev"
+
 func main() {
 	args := os.Args[1:]
 	if len(args) == 0 {
