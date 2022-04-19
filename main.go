@@ -6,31 +6,57 @@ import (
 	"strings"
 )
 
+const (
+	defaultWhoisAddress = "whois.iana.org"
+	defaultWhoisPort    = "43"
+)
+
 func main() {
 	args := os.Args[1:]
 	if len(args) == 0 {
-		fmt.Println("no domain specified")
+		fmt.Println("no host specified, run ")
 		os.Exit(0)
 	}
+	host := args[0]
 
-	b, err := Whois("whois.iana.org", "43", args[0])
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	fmt.Println(string(b))
+	printWhois(host)
+	printSANs(host)
+	printLookup(host)
+}
 
-	dnsNames, err := SANs(args[0])
+func printWhois(host string) {
+	addr, response, err := Whois(defaultWhoisAddress, defaultWhoisPort, host)
+	printHeader(fmt.Sprintf("whois %s", addr))
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		fmt.Println(err.Error())
+		return
 	}
-	fmt.Printf("SANs: %s\n", strings.Join(dnsNames, ", "))
+	fmt.Println(string(response))
+}
 
-	host, err := LookupHost(args[0])
+func printSANs(host string) {
+	tlsVersion, response, err := SANs(host)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		printHeader(fmt.Sprintf("SANs %s", host))
+		fmt.Println(err.Error())
+		return
 	}
-	fmt.Println(host.PrettyString())
+	printHeader(fmt.Sprintf("SANs %s %s", tlsVersion, host))
+	fmt.Println(strings.Join(response, ", "))
+	fmt.Println()
+}
+
+func printLookup(host string) {
+	printHeader("lookup")
+	response, err := LookupHost(host)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	fmt.Println(response.PrettyString())
+	fmt.Println()
+}
+
+func printHeader(msg string) {
+	fmt.Printf(" --- [ %s ] ---\n", msg)
 }
