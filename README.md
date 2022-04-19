@@ -1,6 +1,21 @@
 # lookup
 simple cli tool to check domain
 
+## install
+
+### brew
+
+- add tap `brew tap pete911/tap`
+- install `brew install lookup`
+
+### go
+
+[go](https://golang.org/dl/) has to be installed.
+- build `go build`
+- install `go install`
+
+## example
+
 ```shell
 lookup ycombinator.com
 
