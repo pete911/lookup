@@ -10,8 +10,9 @@ lookup ycombinator.com
    Registrar WHOIS Server: whois.gandi.net
    ... <removed content to make example easier to read> ...
 
- --- [ SANs TLS 1.3 ] ---
-ycombinator.com, *.ycombinator.com
+ --- [ certs TLS 1.3 ] ---
+SANs: ycombinator.com, *.ycombinator.com
+Expiry: 2023-05-12 23:59:59 +0000 UTC
 
  --- [ lookup ] ---
 ycombinator.com has address

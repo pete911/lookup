@@ -20,7 +20,7 @@ func main() {
 	host := args[0]
 
 	printWhois(host)
-	printSANs(host)
+	printCerts(host)
 	printLookup(host)
 }
 
@@ -34,15 +34,16 @@ func printWhois(host string) {
 	fmt.Println(string(response))
 }
 
-func printSANs(host string) {
-	tlsVersion, response, err := SANs(host)
+func printCerts(host string) {
+	certs, err := GetCerts(host)
 	if err != nil {
-		printHeader("SANs")
+		printHeader("certs")
 		fmt.Println(err.Error())
 		return
 	}
-	printHeader(fmt.Sprintf("SANs %s", tlsVersion))
-	fmt.Println(strings.Join(response, ", "))
+	printHeader(fmt.Sprintf("certs %s", certs.TLSVersion))
+	fmt.Printf("SANs: %s\n", strings.Join(certs.SANs, ", "))
+	fmt.Printf("Expiry: %s\n", certs.Expiry)
 	fmt.Println()
 }
 

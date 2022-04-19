@@ -9,19 +9,28 @@ import (
 
 const certTLSDialTimeout = 5 * time.Second
 
-// SANs returns tls version and SANs for specified host
-func SANs(host string) (string, []string, error) {
+type Certs struct {
+	TLSVersion string
+	SANs       []string
+	Expiry     time.Time
+}
+
+func GetCerts(host string) (Certs, error) {
 	address := net.JoinHostPort(host, "443")
 	conn, err := tls.DialWithDialer(&net.Dialer{Timeout: certTLSDialTimeout}, "tcp", address, &tls.Config{InsecureSkipVerify: true})
 	if err != nil {
-		return "", nil, fmt.Errorf("dial %s: %w", address, err)
+		return Certs{}, fmt.Errorf("dial %s: %w", address, err)
 	}
 	defer conn.Close()
 
 	// search only unique dns names
 	dnsSet := make(map[string]struct{})
 	var dnsNames []string
-	for _, cert := range conn.ConnectionState().PeerCertificates {
+	var expiry time.Time
+	for i, cert := range conn.ConnectionState().PeerCertificates {
+		if i == 0 || cert.NotAfter.Before(expiry) {
+			expiry = cert.NotAfter
+		}
 		for _, dnsName := range cert.DNSNames {
 			if _, ok := dnsSet[dnsName]; ok {
 				continue
@@ -30,7 +39,12 @@ func SANs(host string) (string, []string, error) {
 			dnsSet[dnsName] = struct{}{}
 		}
 	}
-	return tlsFormat(conn.ConnectionState().Version), dnsNames, nil
+
+	return Certs{
+		TLSVersion: tlsFormat(conn.ConnectionState().Version),
+		SANs:       dnsNames,
+		Expiry:     expiry,
+	}, nil
 }
 
 func tlsFormat(tlsVersion uint16) string {
