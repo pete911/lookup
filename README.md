@@ -1,4 +1,7 @@
 # lookup
+
+[![pipeline](https://github.com/pete911/lookup/actions/workflows/pipeline.yml/badge.svg)](https://github.com/pete911/lookup/actions/workflows/pipeline.yml)
+
 simple cli tool to check domain
 
 ## install
