@@ -1,3 +1,3 @@
 module github.com/pete911/lookup
 
-go 1.21
+go 1.22
